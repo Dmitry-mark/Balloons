@@ -1,6 +1,13 @@
 // screens/StartScreen.js
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  Image
+} from 'react-native';
 import LottieView from 'lottie-react-native';
 
 export default function StartScreen({ navigation }) {
@@ -17,19 +24,23 @@ export default function StartScreen({ navigation }) {
         style={styles.lottieBackground}
       />
       
-      <View style={styles.container}>
-        {/* GIF с названием игры выше по экрану */}
+      <View style={styles.lable}>
+        {/* PNG с надписью Floatopia (можно задать другой marginTop при необходимости) */}
         <Image
           source={require('../assets/Floatopia.png')}
           style={styles.titleGif}
         />
-
-        {/* Кнопка старта игры */}
+      </View>
+        {/* Кнопка с полупрозрачным фоном и иконкой внутри */}
+      <View style={styles.content}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate('BalloonGame')}
         >
-          <Text style={styles.buttonText}>Начать игру</Text>
+          <Image
+            source={require('../assets/play.png')}
+            style={styles.buttonImage}
+          />
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -45,28 +56,38 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  container: {
+  content: {
     flex: 1,
-    // Убираем вертикальное центрирование, чтобы можно было «поднять» GIF
+    alignItems: 'center', // Горизонтальное центрирование элементов
+    marginTop: -110,
+    // Если нужно отцентрировать и по вертикали, добавьте justifyContent: 'center'
+  },
+  // Надпись Floatopia
+  titleGif: {
+    width: 500,
+    height: 100,
+    resizeMode: 'contain',
+    marginTop: 150,  // Отступ сверху, чтобы поднять надпись
+    marginBottom: 40,
+  },
+  lable: {
+    flex: 1,
     alignItems: 'center',
   },
-  // GIF с названием игры
-  titleGif: {
-    width: 300,
-    height: 80,
-    resizeMode: 'contain',
-    marginTop: 300,            // поднимаем выше
-    marginBottom: 40,         // отступ снизу, // убираем фон
-  },
+  // Стиль кнопки
   button: {
-    backgroundColor: '#FFA500',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    elevation: 3,
+    backgroundColor: 'rgba(255, 225, 198, 0.65)', // Полупрозрачный оранжевый
+    paddingHorizontal: 70,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop:-20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
+  // Изображение внутри кнопки
+  buttonImage: {
+    width: 140,
+    height: 60,
+    resizeMode: 'contain',
   },
 });
