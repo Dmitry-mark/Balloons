@@ -1,11 +1,14 @@
 // screens/StartScreen.js
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image } from 'react-native';
 import LottieView from 'lottie-react-native';
 
 export default function StartScreen({ navigation }) {
   return (
-    <View style={styles.container}>
+    <ImageBackground 
+      source={require('../assets/background.png')}
+      style={styles.background}
+    >
       {/* Lottie-анимация на заднем фоне */}
       <LottieView
         source={require('../assets/Animation.json')} 
@@ -13,39 +16,47 @@ export default function StartScreen({ navigation }) {
         loop
         style={styles.lottieBackground}
       />
+      
+      <View style={styles.container}>
+        {/* GIF с названием игры выше по экрану */}
+        <Image
+          source={require('../assets/Floatopia.png')}
+          style={styles.titleGif}
+        />
 
-      {/* Заголовок/название игры */}
-      <Text style={styles.title}>Balloons Game</Text>
-
-      {/* Меню - кнопка старта игры */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('BalloonGame')} // переход к экрану игры
-      >
-        <Text style={styles.buttonText}>Начать игру</Text>
-      </TouchableOpacity>
-    </View>
+        {/* Кнопка старта игры */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('BalloonGame')}
+        >
+          <Text style={styles.buttonText}>Начать игру</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: { 
     flex: 1,
-    // Чтобы анимация шла "под" элементы, фон сделаем прозрачным
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   lottieBackground: {
     position: 'absolute',
     width: '100%',
     height: '100%',
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 40,
+  container: {
+    flex: 1,
+    // Убираем вертикальное центрирование, чтобы можно было «поднять» GIF
+    alignItems: 'center',
+  },
+  // GIF с названием игры
+  titleGif: {
+    width: 300,
+    height: 80,
+    resizeMode: 'contain',
+    marginTop: 300,            // поднимаем выше
+    marginBottom: 40,         // отступ снизу, // убираем фон
   },
   button: {
     backgroundColor: '#FFA500',
