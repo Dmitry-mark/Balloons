@@ -42,20 +42,21 @@ export default function StartScreen({ navigation }) {
         loop
         style={styles.lottieBackground}
       />
-      
-      <View style={styles.lable}>
-        {/* PNG с надписью Floatopia */}
+
+      {/* Блок с логотипом/названием игры */}
+      <View style={styles.labelContainer}>
         <Image
           source={require('../assets/Floatopia.png')}
           style={styles.titleGif}
         />
       </View>
-      
-      {/* Отображение баланса */}
+
+      {/* Блок с балансом (абсолютное позиционирование) */}
       <View style={styles.balanceContainer}>
-        <Text style={styles.balanceText}>Баланс: {balance} валюты</Text>
+        <Text style={styles.balanceText}>Balloonies: {balance}</Text>
       </View>
-      
+
+      {/* Блок с кнопками (центр экрана) */}
       <View style={styles.content}>
         <TouchableOpacity
           style={styles.button}
@@ -63,6 +64,24 @@ export default function StartScreen({ navigation }) {
         >
           <Image
             source={require('../assets/play.png')}
+            style={styles.buttonImage}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('ShopScreen')}
+        >
+          <Image
+            source={require('../assets/Shop.png')}
+            style={styles.buttonImage}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Rules')}
+        >
+          <Image
+            source={require('../assets/Rules.png')}
             style={styles.buttonImage}
           />
         </TouchableOpacity>
@@ -80,43 +99,54 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  content: {
-    flex: 1,
+
+  // Логотип / название игры
+  labelContainer: {
+    marginTop: 150,
     alignItems: 'center',
-    marginTop: -110,
   },
   titleGif: {
     width: 500,
     height: 100,
     resizeMode: 'contain',
-    marginTop: 150,
-    marginBottom: 40,
   },
-  lable: {
-    flex: 1,
+
+  // Блок с балансом (абсолютное позиционирование)
+  balanceContainer: {
+    position: 'absolute',
+    top: 300,
+    left: 0,
+    right: 0,
     alignItems: 'center',
+  },
+  balanceText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: 'rgb(255, 123, 0)',
+    textShadowColor: 'rgba(4, 4, 4, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
+  },
+
+  // Контейнер для кнопок ентр экрана)
+  content: {
+    flex: 1, 
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -150,
   },
   button: {
     backgroundColor: 'rgba(255, 225, 198, 0.65)',
     paddingHorizontal: 70,
     paddingVertical: 5,
-    borderRadius: 20,
-    marginTop: -20,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
+    marginVertical: 10, // Отступ между кнопками
   },
   buttonImage: {
-    width: 140,
+    width: 150,
     height: 60,
     resizeMode: 'contain',
-  },
-  balanceContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  balanceText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
   },
 });

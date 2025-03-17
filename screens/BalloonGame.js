@@ -230,18 +230,18 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
       source={require('../assets/background.png')}
       style={styles.background}
     >
-       {/* Lottie-анимация на заднем фоне */}
-            <LottieView
-              source={require('../assets/Animation.json')} 
-              autoPlay
-              loop
-              style={styles.lottieBackground}
-            />
+      {/* Lottie-анимация на заднем фоне */}
+      <LottieView
+        source={require('../assets/Animation.json')} 
+        autoPlay
+        loop
+        style={styles.lottieBackground}
+      />
 
       <View style={styles.scoreContainer}>
-        <Text style={styles.scoreText}>Валюта: {score}</Text>
-        <Text style={styles.scoreText}>Time: {elapsedTime} s</Text>
+        <Text style={styles.scoreText}>Balloonies: {score}</Text>
       </View>
+
       {objects.map(obj => {
         if (obj.type === 'balloon') {
           return (
@@ -270,6 +270,8 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
         }
         return null;
       })}
+
+      {/* Кнопка выхода с изображением вместо текста */}
       <TouchableOpacity
         style={styles.exitButton}
         onPress={() => {
@@ -280,23 +282,36 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
           }
         }}
       >
-        <Text style={styles.exitButtonText}>Exit</Text>
+        <Image
+          source={require('../assets/Exit.png')}
+          style={styles.exitButtonImage}
+        />
       </TouchableOpacity>
+
       {gameOver && (
         <View style={styles.overlay}>
           <View style={styles.gameOverBox}>
-            <Text style={styles.gameOverText}>Game Over</Text>
-            <TouchableOpacity style={styles.button} onPress={restartGame}>
-              <Text style={styles.buttonText}>Restart</Text>
+            <Image
+              source={require('../assets/Over.png')}
+              style={styles.gameOverImage}
+            />
+            <TouchableOpacity style={styles.overlayButton} onPress={restartGame}>
+              <Image
+                source={require('../assets/Restart.png')}
+                style={styles.overlayButtonImage}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => {
+            <TouchableOpacity style={styles.overlayButton} onPress={() => {
               if (navigation) {
                 navigation.navigate('StartScreen');
               } else {
                 Alert.alert('Exit', 'Вернуться в меню');
               }
             }}>
-              <Text style={styles.buttonText}>Go back to the menu</Text>
+              <Image
+                source={require('../assets/Menu.png')}
+                style={styles.overlayButtonImage}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -316,7 +331,7 @@ const styles = StyleSheet.create({
   },
   scoreContainer: {
     position: 'absolute',
-    top: 40,
+    top: 70,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -326,19 +341,21 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 28,
     fontWeight: 'bold',
+    color: 'rgb(255, 123, 0)',
   },
   exitButton: {
     position: 'absolute',
-    top: 40,
+    top: 60,
     left: 20,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: 'rgba(255, 225, 198, 0.65)',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 20,
     zIndex: 20,
   },
-  exitButtonText: {
-    color: 'black',
-    fontWeight: 'bold',
+  exitButtonImage: {
+    width: 60,
+    height: 30,
+    resizeMode: 'contain',
   },
   overlay: {
     position: 'absolute',
@@ -346,35 +363,32 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 30,
   },
   gameOverBox: {
     width: windowWidth * 0.8,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 225, 198, 0.65)',
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 30,
     alignItems: 'center',
   },
-  gameOverText: {
-    fontSize: 32,
-    fontWeight: 'bold',
+  gameOverImage: {
+    width: 250,
+    height: 60,
+    resizeMode: 'contain',
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: '#4287f5',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+  overlayButton: {
     marginVertical: 10,
-    borderRadius: 5,
-    width: '80%',
-    alignItems: 'center',
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
+  overlayButtonImage: {
+    width: 200,
+    height: 60,
+    resizeMode: 'contain',
+    backgroundColor: 'rgba(253, 169, 59, 0.82)',
+    borderRadius: 25,
+    padding: 5,
   },
 });
-
