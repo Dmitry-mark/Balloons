@@ -9,9 +9,11 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-navigation/native": "^7.0.15",
     "@react-navigation/stack": "^7.1.2",
     "expo": "~52.0.38",
+    "expo-linear-gradient": "~14.0.2",
     "expo-status-bar": "~2.0.1",
     "lottie-react-native": "^7.2.2",
     "matter-js": "^0.20.0",
@@ -20,11 +22,11 @@
     "react-native-game-engine": "^1.2.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-safe-area-context": "^5.3.0",
-    "react-native-screens": "^4.9.2",
-    "expo-linear-gradient": "~14.0.2"
+    "react-native-screens": "^4.9.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "^18.0.0"
   },
   "private": true
 }

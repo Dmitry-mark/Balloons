@@ -12,26 +12,22 @@ import {
   Animated,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
 const balloonSize = windowWidth * 0.3; // Размер объекта ~30% ширины экрана
 const COLORS = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
 const SPAWN_INTERVAL = 800; // интервал появления объектов (в мс)
-
-// Начальная вероятность появления бомбы
 const INITIAL_BOMB_PROBABILITY = 0.05;
 
-//
-// Компонент обычного шара
-//
 // Компонент обычного шара
 const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
   const translateY = useRef(new Animated.Value(windowHeight)).current;
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const [popped, setPopped] = useState(false);
-  const poppedRef = useRef(false); // Новый ref для отслеживания, был ли шар лопнут
+  const poppedRef = useRef(false); // для синхронной проверки
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -50,7 +46,7 @@ const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
   const handlePress = () => {
     if (poppedRef.current) return;
     setPopped(true);
-    poppedRef.current = true; // Обновляем ref сразу
+    poppedRef.current = true;
     Animated.parallel([
       Animated.timing(scale, {
         toValue: 1.5,
@@ -63,7 +59,7 @@ const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      onPop();
+      onPop();      
       onRemove(id);
     });
   };
@@ -89,10 +85,7 @@ const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
   );
 };
 
-
-//
 // Компонент бомбы с Lottie-анимацией взрыва
-//
 const Bomb = ({ id, x, duration, onGameOver, onRemove }) => {
   const translateY = useRef(new Animated.Value(windowHeight)).current;
   const scale = useRef(new Animated.Value(1)).current;
@@ -146,17 +139,17 @@ const Bomb = ({ id, x, duration, onGameOver, onRemove }) => {
 };
 
 export default function BalloonPopGameWithBombExplosion({ navigation }) {
-  const [objects, setObjects] = useState([]); // хранит и шары, и бомбы
-  const [score, setScore] = useState(0);
+  const [objects, setObjects] = useState([]); // объекты (шары и бомбы)
+  const [score, setScore] = useState(0); // заработанная валюта за сессию
   const [gameOver, setGameOver] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0); // время в секундах с начала игры
+  const [elapsedTime, setElapsedTime] = useState(0); // время игры в секундах
 
   // Для актуального доступа к времени используем ref
   const elapsedTimeRef = useRef(0);
   const objectId = useRef(0);
   const spawnInterval = useRef(null);
 
-  // Обновляем время каждую секунду
+  // Обновление времени каждую секунду
   useEffect(() => {
     const timer = setInterval(() => {
       elapsedTimeRef.current += 1;
@@ -169,9 +162,9 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
   const spawnObject = () => {
     const x = Math.random() * (windowWidth - balloonSize);
     const id = objectId.current++;
-    // Увеличиваем вероятность появления бомбы с течением времени (максимум 0.5)
+    // Увеличиваем вероятность появления бомбы с течением времени (до 0.5)
     const currentBombProbability = Math.min(0.5, INITIAL_BOMB_PROBABILITY + elapsedTimeRef.current * 0.005);
-    // Уменьшаем длительность анимации (объекты летают быстрее), но не ниже определённого минимума
+    // Уменьшаем длительность анимации (объекты летают быстрее), но не ниже минимума
     const minDuration = Math.max(1000, 3000 - elapsedTimeRef.current * 50);
     const maxDuration = Math.max(2000, 6000 - elapsedTimeRef.current * 50);
     const duration = Math.floor(Math.random() * (maxDuration - minDuration)) + minDuration;
@@ -190,7 +183,7 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
     }
   };
 
-  // Интервал спавна объектов (используем постоянный интервал, параметры объектов вычисляются динамически)
+  // Интервал спавна объектов
   useEffect(() => {
     if (!gameOver) {
       spawnInterval.current = setInterval(spawnObject, SPAWN_INTERVAL);
@@ -199,13 +192,24 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
   }, [gameOver]);
 
   const handlePop = () => {
+    // За каждый лопнутый шар начисляем 10 единиц валюты
     setScore(prev => prev + 10);
   };
 
-  const handleGameOver = () => {
+  // Функция завершения игры и обновления баланса
+  const handleGameOver = async () => {
+    if (gameOver) return;
     setGameOver(true);
-    setObjects([]);
     clearInterval(spawnInterval.current);
+    try {
+      const currentBalanceStr = await AsyncStorage.getItem('balance');
+      const currentBalance = currentBalanceStr ? parseInt(currentBalanceStr, 10) : 0;
+      const newBalance = currentBalance + score;
+      await AsyncStorage.setItem('balance', newBalance.toString());
+    } catch (error) {
+      console.error("Ошибка при обновлении баланса: ", error);
+    }
+    setObjects([]);
   };
 
   const handleRemove = (id) => {
@@ -226,8 +230,17 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
       source={require('../assets/background.png')}
       style={styles.background}
     >
+       {/* Lottie-анимация на заднем фоне */}
+            <LottieView
+              source={require('../assets/Animation.json')} 
+              autoPlay
+              loop
+              style={styles.lottieBackground}
+            />
+
       <View style={styles.scoreContainer}>
-        <Text style={styles.scoreText}>Score: {score}</Text>
+        <Text style={styles.scoreText}>Валюта: {score}</Text>
+        <Text style={styles.scoreText}>Time: {elapsedTime} s</Text>
       </View>
       {objects.map(obj => {
         if (obj.type === 'balloon') {
@@ -296,6 +309,11 @@ const styles = StyleSheet.create({
   background: { 
     flex: 1,
   },
+  lottieBackground: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
   scoreContainer: {
     position: 'absolute',
     top: 40,
@@ -359,3 +377,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+

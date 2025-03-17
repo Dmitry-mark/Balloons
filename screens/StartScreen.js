@@ -1,5 +1,5 @@
 // screens/StartScreen.js
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,28 @@ import {
   ImageBackground,
   Image
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 
 export default function StartScreen({ navigation }) {
+  const [balance, setBalance] = useState(0);
+
+  const loadBalance = async () => {
+    try {
+      const balanceStr = await AsyncStorage.getItem('balance');
+      setBalance(balanceStr ? parseInt(balanceStr, 10) : 0);
+    } catch (error) {
+      console.error("Ошибка при загрузке баланса: ", error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadBalance();
+    }, [])
+  );
+
   return (
     <ImageBackground 
       source={require('../assets/background.png')}
@@ -25,13 +44,18 @@ export default function StartScreen({ navigation }) {
       />
       
       <View style={styles.lable}>
-        {/* PNG с надписью Floatopia (можно задать другой marginTop при необходимости) */}
+        {/* PNG с надписью Floatopia */}
         <Image
           source={require('../assets/Floatopia.png')}
           style={styles.titleGif}
         />
       </View>
-        {/* Кнопка с полупрозрачным фоном и иконкой внутри */}
+      
+      {/* Отображение баланса */}
+      <View style={styles.balanceContainer}>
+        <Text style={styles.balanceText}>Баланс: {balance} валюты</Text>
+      </View>
+      
       <View style={styles.content}>
         <TouchableOpacity
           style={styles.button}
@@ -58,36 +82,41 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    alignItems: 'center', // Горизонтальное центрирование элементов
+    alignItems: 'center',
     marginTop: -110,
-    // Если нужно отцентрировать и по вертикали, добавьте justifyContent: 'center'
   },
-  // Надпись Floatopia
   titleGif: {
     width: 500,
     height: 100,
     resizeMode: 'contain',
-    marginTop: 150,  // Отступ сверху, чтобы поднять надпись
+    marginTop: 150,
     marginBottom: 40,
   },
   lable: {
     flex: 1,
     alignItems: 'center',
   },
-  // Стиль кнопки
   button: {
-    backgroundColor: 'rgba(255, 225, 198, 0.65)', // Полупрозрачный оранжевый
+    backgroundColor: 'rgba(255, 225, 198, 0.65)',
     paddingHorizontal: 70,
     paddingVertical: 5,
     borderRadius: 20,
-    marginTop:-20,
+    marginTop: -20,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // Изображение внутри кнопки
   buttonImage: {
     width: 140,
     height: 60,
     resizeMode: 'contain',
+  },
+  balanceContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  balanceText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
