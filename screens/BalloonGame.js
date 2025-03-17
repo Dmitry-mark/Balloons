@@ -18,14 +18,20 @@ const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
 const balloonSize = windowWidth * 0.3; // Размер объекта ~30% ширины экрана
 const COLORS = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
 const SPAWN_INTERVAL = 800; // интервал появления объектов (в мс)
-const BOMB_PROBABILITY = 0.05; // 5% шанс появления бомбы
 
+// Начальная вероятность появления бомбы
+const INITIAL_BOMB_PROBABILITY = 0.05;
+
+//
 // Компонент обычного шара
-const Balloon = ({ id, x, color, duration, onPop, onRemove }) => {
+//
+// Компонент обычного шара
+const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
   const translateY = useRef(new Animated.Value(windowHeight)).current;
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const [popped, setPopped] = useState(false);
+  const poppedRef = useRef(false); // Новый ref для отслеживания, был ли шар лопнут
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -33,13 +39,18 @@ const Balloon = ({ id, x, color, duration, onPop, onRemove }) => {
       duration: duration,
       useNativeDriver: true,
     }).start(() => {
-      if (!popped) onRemove(id);
+      // Если шар не был лопнут, завершаем игру
+      if (!poppedRef.current) {
+        onGameOver();
+      }
+      onRemove(id);
     });
   }, []);
 
   const handlePress = () => {
-    if (popped) return;
+    if (poppedRef.current) return;
     setPopped(true);
+    poppedRef.current = true; // Обновляем ref сразу
     Animated.parallel([
       Animated.timing(scale, {
         toValue: 1.5,
@@ -52,7 +63,7 @@ const Balloon = ({ id, x, color, duration, onPop, onRemove }) => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      onPop();      
+      onPop();
       onRemove(id);
     });
   };
@@ -78,7 +89,10 @@ const Balloon = ({ id, x, color, duration, onPop, onRemove }) => {
   );
 };
 
+
+//
 // Компонент бомбы с Lottie-анимацией взрыва
+//
 const Bomb = ({ id, x, duration, onGameOver, onRemove }) => {
   const translateY = useRef(new Animated.Value(windowHeight)).current;
   const scale = useRef(new Animated.Value(1)).current;
@@ -98,7 +112,7 @@ const Bomb = ({ id, x, duration, onGameOver, onRemove }) => {
   const handlePress = () => {
     if (exploded) return;
     setExploded(true);
-    // Можно остановить текущую анимацию, если нужно: translateY.stopAnimation();
+    // При необходимости можно остановить текущую анимацию: translateY.stopAnimation();
   };
 
   return (
@@ -135,17 +149,37 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
   const [objects, setObjects] = useState([]); // хранит и шары, и бомбы
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0); // время в секундах с начала игры
+
+  // Для актуального доступа к времени используем ref
+  const elapsedTimeRef = useRef(0);
   const objectId = useRef(0);
   const spawnInterval = useRef(null);
 
+  // Обновляем время каждую секунду
+  useEffect(() => {
+    const timer = setInterval(() => {
+      elapsedTimeRef.current += 1;
+      setElapsedTime(elapsedTimeRef.current);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Функция спавна объектов с динамическими параметрами
   const spawnObject = () => {
     const x = Math.random() * (windowWidth - balloonSize);
     const id = objectId.current++;
+    // Увеличиваем вероятность появления бомбы с течением времени (максимум 0.5)
+    const currentBombProbability = Math.min(0.5, INITIAL_BOMB_PROBABILITY + elapsedTimeRef.current * 0.005);
+    // Уменьшаем длительность анимации (объекты летают быстрее), но не ниже определённого минимума
+    const minDuration = Math.max(1000, 3000 - elapsedTimeRef.current * 50);
+    const maxDuration = Math.max(2000, 6000 - elapsedTimeRef.current * 50);
+    const duration = Math.floor(Math.random() * (maxDuration - minDuration)) + minDuration;
+    
     let type = 'balloon';
-    if (Math.random() < BOMB_PROBABILITY) {
+    if (Math.random() < currentBombProbability) {
       type = 'bomb';
     }
-    const duration = Math.floor(Math.random() * (6000 - 3000)) + 3000;
     if (type === 'balloon') {
       const color = COLORS[Math.floor(Math.random() * COLORS.length)];
       const newObject = { id, x, type, color, duration };
@@ -156,6 +190,7 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
     }
   };
 
+  // Интервал спавна объектов (используем постоянный интервал, параметры объектов вычисляются динамически)
   useEffect(() => {
     if (!gameOver) {
       spawnInterval.current = setInterval(spawnObject, SPAWN_INTERVAL);
@@ -182,6 +217,8 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
     setGameOver(false);
     setObjects([]);
     objectId.current = 0;
+    elapsedTimeRef.current = 0;
+    setElapsedTime(0);
   };
 
   return (
@@ -202,6 +239,7 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
               color={obj.color}
               duration={obj.duration}
               onPop={handlePop}
+              onGameOver={handleGameOver}
               onRemove={handleRemove}
             />
           );
