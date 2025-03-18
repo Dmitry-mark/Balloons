@@ -12,26 +12,81 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 const products = [
   {
     id: '1',
     name: 'Shevrole Camaro',
-    price: 1000,
+    price: 1200,
     image: require('../assets/car1.png'),
   },
   {
     id: '2',
     name: 'BMW M3',
-    price: 1500,
+    price: 1800,
     image: require('../assets/car2.png'),
   },
   {
     id: '3',
-    name: 'Mustang Shelbi, l',
-    price: 2000,
+    name: 'Mustang Shelbi',
+    price: 2200,
     image: require('../assets/car3.png'),
   },
+  {
+    id: '4',
+    name: 'Porsche 911 Cayman',
+    price: 2600,
+    image: require('../assets/car4.png'),
+  },
+  {
+    id: '5',
+    name: 'Maserati GRANCABRIO 2020',
+    price: 3000,
+    image: require('../assets/car5.png'),
+  },
+  {
+    id: '6',
+    name: 'Aston Martin rapide, 2011',
+    price: 3400,
+    image: require('../assets/car6.png'),
+  },
+  {
+    id: '7',
+    name: 'Tesla model s',
+    price: 3800,
+    image: require('../assets/car7.png'),
+  },
+  {
+    id: '8',
+    name: 'Mercedes Benz SL 600',
+    price: 4200,
+    image: require('../assets/car8.png'),
+  },
+  {
+    id: '9',
+    name: 'Cadillac Elmiraj 2020',
+    price: 4600,
+    image: require('../assets/car9.png'),
+  },
+  {
+    id: '10',
+    name: 'Chrysler Town & Country 1966',
+    price: 5000,
+    image: require('../assets/car10.png'),
+  },
+  {
+    id: '11',
+    name: 'Jaguar XJ Mark 4',
+    price: 5400,
+    image: require('../assets/car11.png'),
+  },
+  {
+    id: '12',
+    name: 'Silver Mazda Miata MX5',
+    price: 5800,
+    image: require('../assets/car12.png'),
+  }
 ];
 
 // Функция для заполнения последней строки, если элементов нечётное число
@@ -49,35 +104,63 @@ export default function ShopScreen({ navigation }) {
   const [balance, setBalance] = useState(0);
   const [purchasedProducts, setPurchasedProducts] = useState([]);
 
-  // Загружаем баланс из AsyncStorage при монтировании экрана
+  // Загружаем баланс при монтировании экрана
   useEffect(() => {
     const loadBalance = async () => {
       try {
         const balanceStr = await AsyncStorage.getItem('balance');
         setBalance(balanceStr ? parseInt(balanceStr, 10) : 0);
       } catch (error) {
-        console.error("Ошибка при загрузке баланса: ", error);
+        console.error("Error loading balance: ", error);
       }
     };
     loadBalance();
   }, []);
+
+  // Загружаем купленные товары при каждом фокусе экрана
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadPurchasedProducts = async () => {
+        try {
+          const purchasedStr = await AsyncStorage.getItem('purchasedProducts');
+          if (purchasedStr) {
+            setPurchasedProducts(JSON.parse(purchasedStr));
+          }
+        } catch (error) {
+          console.error("Error when loading purchased items: ", error);
+        }
+      };
+      loadPurchasedProducts();
+    }, [])
+  );
+
+  // Сохраняем список купленных товаров в AsyncStorage при его изменении
+  useEffect(() => {
+    const savePurchasedProducts = async () => {
+      try {
+        await AsyncStorage.setItem('purchasedProducts', JSON.stringify(purchasedProducts));
+      } catch (error) {
+        console.error("Error saving purchased items: ", error);
+      }
+    };
+    savePurchasedProducts();
+  }, [purchasedProducts]);
 
   // Функция для обновления баланса в AsyncStorage
   const updateBalance = async (newBalance) => {
     try {
       await AsyncStorage.setItem('balance', newBalance.toString());
     } catch (error) {
-      console.error("Ошибка при обновлении баланса: ", error);
+      console.error("Error updating balance: ", error);
     }
   };
 
   // Логика покупки товара
   const handlePurchase = (item) => {
-    // Если товар уже куплен, ничего не делаем
     if (purchasedProducts.includes(item.id)) return;
 
     if (balance < item.price) {
-      Alert.alert("Недостаточно средств", "У вас недостаточно Balloonies для покупки этого товара.");
+      Alert.alert("Insufficient funds", "You don't have enough Balloonies to purchase this product.");
       return;
     }
     const newBalance = balance - item.price;
@@ -110,10 +193,10 @@ export default function ShopScreen({ navigation }) {
         {isPurchased ? (
           <View style={styles.buttonRow}>
             <TouchableOpacity style={[styles.button, styles.purchasedButton]} disabled={true}>
-              <Text style={styles.buttonText}>куплено</Text>
+              <Text style={styles.buttonText}>Purchased</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.button, styles.sellButton]} onPress={() => handleSell(item)}>
-              <Text style={styles.buttonText}>продать</Text>
+              <Text style={styles.buttonText}>Sell</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -121,7 +204,7 @@ export default function ShopScreen({ navigation }) {
             style={styles.button}
             onPress={() => handlePurchase(item)}
           >
-            <Text style={styles.buttonText}>Купить</Text>
+            <Text style={styles.buttonText}>Buy</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -133,15 +216,19 @@ export default function ShopScreen({ navigation }) {
       source={require('../assets/background.png')}
       style={styles.background}
     >
-      {/* Lottie-анимация на заднем фоне */}
       <LottieView
         source={require('../assets/Animation.json')}
         autoPlay
         loop
         style={styles.lottieBackground}
       />
+      <View style={styles.headerContainer}>
+              <Image
+                          source={require('../assets/Rules2.png')}
+                          style={styles.headerTitle}
+                        />
+            </View>
 
-      {/* Стрелочка для возврата на главный экран */}
       <TouchableOpacity 
         style={styles.backArrow}
         onPress={() => navigation.navigate('StartScreen')}
@@ -154,7 +241,7 @@ export default function ShopScreen({ navigation }) {
 
       <View style={styles.container}>
         <FlatList 
-          key={'2'} // фиксированный ключ для двух колонок
+          key={'2'}
           data={formattedProducts}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
@@ -176,7 +263,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  // Стиль для стрелочки (кнопки возврата)
   backArrow: {
     position: 'absolute',
     top: 40,
@@ -191,7 +277,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    marginTop: 100, // отступ сверху
+    marginTop: 60,
   },
   listContainer: {
     paddingBottom: 20,
@@ -205,7 +291,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     alignItems: 'center',
-    width: '47%', // две карточки в ряду
+    width: '47%',
   },
   invisibleCard: {
     backgroundColor: 'transparent',
@@ -229,7 +315,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#ff7b00',
-    borderRadius: 5,
+    borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 15,
   },
@@ -248,5 +334,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerContainer: {
+    marginTop: 50,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    width: 400,
+    height: 100,
+    resizeMode: 'contain',
   },
 });
