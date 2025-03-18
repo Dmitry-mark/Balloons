@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import StartScreen from './screens/StartScreen';
 import BalloonGame from './screens/BalloonGame';
+import Shop from './screens/Shop';
 import Rules from './screens/Rules';
 
 const Stack = createStackNavigator();
@@ -24,6 +25,11 @@ function App() {
       React.createElement(Stack.Screen, {
         name: 'BalloonGame',
         component: BalloonGame,
+        options: { headerShown: false },
+      }),
+      React.createElement(Stack.Screen, {
+        name: 'Shop',
+        component: Shop,
         options: { headerShown: false },
       }),
       React.createElement(Stack.Screen, {
