@@ -72,7 +72,7 @@ export default function StartScreen({ navigation }) {
           onPress={() => navigation.navigate('Shop')}
         >
           <Image
-            source={require('../assets/Shop.png')}
+            source={require('../assets/Shop2.png')}
             style={styles.buttonImage}
           />
         </TouchableOpacity>

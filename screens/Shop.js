@@ -224,7 +224,7 @@ export default function ShopScreen({ navigation }) {
       />
       <View style={styles.headerContainer}>
               <Image
-                          source={require('../assets/Rules2.png')}
+                          source={require('../assets/Shop.png')}
                           style={styles.headerTitle}
                         />
             </View>
@@ -270,14 +270,14 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   arrowImage: {
-    width: 50,
-    height: 40,
+    width: 70,
+    height: 70,
     resizeMode: 'contain',
   },
   container: {
     flex: 1,
     padding: 10,
-    marginTop: 60,
+    marginTop: 20,
   },
   listContainer: {
     paddingBottom: 20,
