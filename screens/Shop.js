@@ -1,4 +1,4 @@
-// screens/Shop.js
+20// screens/Shop.js
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -17,75 +17,63 @@ import { useFocusEffect } from '@react-navigation/native';
 const products = [
   {
     id: '1',
-    name: 'Shevrole Camaro',
+    name: 'Little elephant',
     price: 1200,
-    image: require('../assets/car1.png'),
+    image: require('../assets/animal1.png'),
   },
   {
     id: '2',
-    name: 'BMW M3',
+    name: 'Big deer',
     price: 1800,
-    image: require('../assets/car2.png'),
+    image: require('../assets/animal2.png'),
   },
   {
     id: '3',
-    name: 'Mustang Shelbi',
+    name: 'Little hawk',
     price: 2200,
-    image: require('../assets/car3.png'),
+    image: require('../assets/animal3.png'),
   },
   {
     id: '4',
-    name: 'Porsche 911 Cayman',
+    name: 'Little chihuahua',
     price: 2600,
-    image: require('../assets/car4.png'),
+    image: require('../assets/animal4.png'),
   },
   {
     id: '5',
-    name: 'Maserati GRANCABRIO 2020',
+    name: 'Hedgehog',
     price: 3000,
-    image: require('../assets/car5.png'),
+    image: require('../assets/animal5.png'),
   },
   {
     id: '6',
-    name: 'Aston Martin rapide, 2011',
+    name: 'Blue bird',
     price: 3400,
-    image: require('../assets/car6.png'),
+    image: require('../assets/animal6.png'),
   },
   {
     id: '7',
-    name: 'Tesla model s',
+    name: 'Little lion',
     price: 3800,
-    image: require('../assets/car7.png'),
+    image: require('../assets/animal7.png'),
   },
   {
     id: '8',
-    name: 'Mercedes Benz SL 600',
+    name: 'Little bear',
     price: 4200,
-    image: require('../assets/car8.png'),
+    image: require('../assets/animal8.png'),
   },
   {
     id: '9',
-    name: 'Cadillac Elmiraj 2020',
+    name: 'Penguin',
     price: 4600,
-    image: require('../assets/car9.png'),
+    image: require('../assets/animal9.png'),
   },
   {
     id: '10',
-    name: 'Chrysler Town & Country 1966',
+    name: 'Little tiger',
     price: 5000,
-    image: require('../assets/car10.png'),
-  },
-  {
-    id: '11',
-    name: 'Jaguar XJ Mark 4',
-    price: 5400,
-    image: require('../assets/car11.png'),
-  },
-  {
-    id: '12',
-    name: 'Silver Mazda Miata MX5',
-    price: 5800,
-    image: require('../assets/car12.png'),
+    image: require('../assets/animal10.png'),
   }
 ];
 
@@ -187,7 +175,9 @@ export default function ShopScreen({ navigation }) {
     const isPurchased = purchasedProducts.includes(item.id);
     return (
       <View style={styles.card}>
-        <Image source={item.image} style={styles.productImage} />
+        <View style={styles.imageWrapper}>
+  <Image source={item.image} style={styles.productImage} />
+</View>
         <Text style={styles.productName}>{item.name}</Text>
         <Text style={styles.price}>{item.price} Balloonies</Text>
         {isPurchased ? (
@@ -297,10 +287,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     elevation: 0,
   },
+  imageWrapper: {
+    width: '100%',
+    height: 160, // Фиксированная высота для всех фото
+    overflow: 'hidden',
+    borderRadius: 20, // Если хотите скругление, можно убрать или изменить
+  },
   productImage: {
     width: '100%',
-    height: 120,
-    resizeMode: 'contain',
+    height: '100%',
+    resizeMode: 'cover',
   },
   productName: {
     fontSize: 16,
