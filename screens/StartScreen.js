@@ -46,7 +46,7 @@ export default function StartScreen({ navigation }) {
       {/* Блок с логотипом/названием игры */}
       <View style={styles.labelContainer}>
         <Image
-          source={require('../assets/Floatopia.png')}
+          source={require('../assets/Boombloon.png')}
           style={styles.titleGif}
         />
       </View>

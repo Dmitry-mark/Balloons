@@ -17,43 +17,43 @@ import { useFocusEffect } from '@react-navigation/native';
 const products = [
   {
     id: '1',
-    name: 'Little elephant',
+    name: 'Little monkey',
     price: 1200,
     image: require('../assets/animal1.png'),
   },
   {
     id: '2',
-    name: 'Big deer',
+    name: 'Little donkey',
     price: 1800,
     image: require('../assets/animal2.png'),
   },
   {
     id: '3',
-    name: 'Little hawk',
+    name: 'Little capybara',
     price: 2200,
     image: require('../assets/animal3.png'),
   },
   {
     id: '4',
-    name: 'Little chihuahua',
+    name: 'Little beaver',
     price: 2600,
     image: require('../assets/animal4.png'),
   },
   {
     id: '5',
-    name: 'Hedgehog',
+    name: 'Little crow',
     price: 3000,
     image: require('../assets/animal5.png'),
   },
   {
     id: '6',
-    name: 'Blue bird',
+    name: 'Wolf',
     price: 3400,
     image: require('../assets/animal6.png'),
   },
   {
     id: '7',
-    name: 'Little lion',
+    name: 'Little hare',
     price: 3800,
     image: require('../assets/animal7.png'),
   },
@@ -65,13 +65,13 @@ const products = [
   },
   {
     id: '9',
-    name: 'Penguin',
+    name: 'Eagle',
     price: 4600,
     image: require('../assets/animal9.png'),
   },
   {
     id: '10',
-    name: 'Little tiger',
+    name: 'Little fox',
     price: 5000,
     image: require('../assets/animal10.png'),
   }
