@@ -53,7 +53,7 @@ export default function StartScreen({ navigation }) {
 
       {/* Блок с балансом (абсолютное позиционирование) */}
       <View style={styles.balanceContainer}>
-        <Text style={styles.balanceText}>Balloonies: {balance}</Text>
+        <Text style={styles.balanceText}>Score: {balance}</Text>
       </View>
 
       {/* Блок с кнопками (центр экрана) */}

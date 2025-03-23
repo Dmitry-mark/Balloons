@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
-    "@react-navigation/native": "^7.0.15",
+    "@react-native-community/masked-view": "^0.1.11",
+    "@react-navigation/native": "^7.0.17",
     "@react-navigation/stack": "^7.1.2",
     "expo": "~52.0.38",
     "expo-linear-gradient": "~14.0.2",
@@ -20,6 +21,7 @@
     "react": "18.3.1",
     "react-native": "0.76.7",
     "react-native-game-engine": "^1.2.0",
+    "react-native-gesture-handler": "^2.24.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-safe-area-context": "^5.3.0",
     "react-native-screens": "^4.9.2"

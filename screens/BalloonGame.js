@@ -239,7 +239,7 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
       />
 
       <View style={styles.scoreContainer}>
-        <Text style={styles.scoreText}>Balloonies: {score}</Text>
+        <Text style={styles.scoreText}>Score: {score}</Text>
       </View>
 
       {objects.map(obj => {

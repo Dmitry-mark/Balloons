@@ -148,7 +148,7 @@ export default function ShopScreen({ navigation }) {
     if (purchasedProducts.includes(item.id)) return;
 
     if (balance < item.price) {
-      Alert.alert("Insufficient funds", "You don't have enough Balloonies to purchase this product.");
+      Alert.alert("Insufficient funds", "You don't have enough Score to purchase this product.");
       return;
     }
     const newBalance = balance - item.price;
@@ -179,7 +179,7 @@ export default function ShopScreen({ navigation }) {
   <Image source={item.image} style={styles.productImage} />
 </View>
         <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.price}>{item.price} Balloonies</Text>
+        <Text style={styles.price}>{item.price} Score</Text>
         {isPurchased ? (
           <View style={styles.buttonRow}>
             <TouchableOpacity style={[styles.button, styles.purchasedButton]} disabled={true}>
