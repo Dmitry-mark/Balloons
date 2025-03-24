@@ -20,14 +20,14 @@ const balloonSize = windowWidth * 0.3; // Размер объекта ~30% ши�
 const COLORS = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
 const SPAWN_INTERVAL = 800; // интервал появления объектов (в мс)
 const INITIAL_BOMB_PROBABILITY = 0.05;
+const LEVEL_DURATION = 10000; // длительность уровня в мс (например, 10 секунд)
 
-// Компонент обычного шара
 const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
   const translateY = useRef(new Animated.Value(windowHeight)).current;
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const [popped, setPopped] = useState(false);
-  const poppedRef = useRef(false); // для синхронной проверки
+  const poppedRef = useRef(false);
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -35,7 +35,6 @@ const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
       duration: duration,
       useNativeDriver: true,
     }).start(() => {
-      // Если шар не был лопнут, завершаем игру
       if (!poppedRef.current) {
         onGameOver();
       }
@@ -85,7 +84,6 @@ const Balloon = ({ id, x, color, duration, onPop, onGameOver, onRemove }) => {
   );
 };
 
-// Компонент бомбы с Lottie-анимацией взрыва
 const Bomb = ({ id, x, duration, onGameOver, onRemove }) => {
   const translateY = useRef(new Animated.Value(windowHeight)).current;
   const scale = useRef(new Animated.Value(1)).current;
@@ -105,7 +103,7 @@ const Bomb = ({ id, x, duration, onGameOver, onRemove }) => {
   const handlePress = () => {
     if (exploded) return;
     setExploded(true);
-    // При необходимости можно остановить текущую анимацию: translateY.stopAnimation();
+    // При необходимости можно остановить текущую анимацию
   };
 
   return (
@@ -142,7 +140,9 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
   const [objects, setObjects] = useState([]); // объекты (шары и бомбы)
   const [score, setScore] = useState(0); // заработанная валюта за сессию
   const [gameOver, setGameOver] = useState(false);
+  const [win, setWin] = useState(false); // новое состояние для победы
   const [elapsedTime, setElapsedTime] = useState(0); // время игры в секундах
+  const [level, setLevel] = useState(1); // уровень сложности
 
   // Для актуального доступа к времени используем ref
   const elapsedTimeRef = useRef(0);
@@ -158,15 +158,65 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
     return () => clearInterval(timer);
   }, []);
 
-  // Функция спавна объектов с динамическими параметрами
+  // Функция завершения игры при проигрыше
+  const handleGameOver = async () => {
+    if (gameOver) return;
+    setGameOver(true);
+    clearInterval(spawnInterval.current);
+    try {
+      const currentBalanceStr = await AsyncStorage.getItem('balance');
+      const currentBalance = currentBalanceStr ? parseInt(currentBalanceStr, 10) : 0;
+      const newBalance = currentBalance + score;
+      await AsyncStorage.setItem('balance', newBalance.toString());
+    } catch (error) {
+      console.error("Ошибка при обновлении баланса: ", error);
+    }
+    setObjects([]);
+  };
+
+  // Функция завершения игры с победой
+  const winGame = async () => {
+    if (gameOver) return;
+    setGameOver(true);
+    setWin(true);
+    clearInterval(spawnInterval.current);
+    try {
+      const currentBalanceStr = await AsyncStorage.getItem('balance');
+      const currentBalance = currentBalanceStr ? parseInt(currentBalanceStr, 10) : 0;
+      const newBalance = currentBalance + score;
+      await AsyncStorage.setItem('balance', newBalance.toString());
+    } catch (error) {
+      console.error("Ошибка при обновлении баланса: ", error);
+    }
+    setObjects([]);
+  };
+
+  // Прогрессия уровней: каждые LEVEL_DURATION мс повышаем уровень до 50 и вызываем победу
+  useEffect(() => {
+    if (!gameOver) {
+      const levelTimer = setInterval(() => {
+        setLevel(prevLevel => {
+          if (prevLevel < 49) {
+            return prevLevel + 1;
+          } else if (prevLevel === 49) {
+            winGame();
+            return 50;
+          }
+          return prevLevel;
+        });
+      }, LEVEL_DURATION);
+      return () => clearInterval(levelTimer);
+    }
+  }, [gameOver]);
+
+  // Функция спавна объектов с динамическими параметрами, зависящими от уровня
   const spawnObject = () => {
     const x = Math.random() * (windowWidth - balloonSize);
     const id = objectId.current++;
-    // Увеличиваем вероятность появления бомбы с течением времени (до 0.5)
-    const currentBombProbability = Math.min(0.5, INITIAL_BOMB_PROBABILITY + elapsedTimeRef.current * 0.005);
-    // Уменьшаем длительность анимации (объекты летают быстрее), но не ниже минимума
-    const minDuration = Math.max(1000, 3000 - elapsedTimeRef.current * 50);
-    const maxDuration = Math.max(2000, 6000 - elapsedTimeRef.current * 50);
+    // Используем уровень для увеличения сложности
+    const currentBombProbability = Math.min(0.5, INITIAL_BOMB_PROBABILITY + level * 0.01);
+    const minDuration = Math.max(1000, 3000 - level * 50);
+    const maxDuration = Math.max(2000, 6000 - level * 50);
     const duration = Math.floor(Math.random() * (maxDuration - minDuration)) + minDuration;
     
     let type = 'balloon';
@@ -189,27 +239,11 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
       spawnInterval.current = setInterval(spawnObject, SPAWN_INTERVAL);
     }
     return () => clearInterval(spawnInterval.current);
-  }, [gameOver]);
+  }, [gameOver, level]);
 
   const handlePop = () => {
     // За каждый лопнутый шар начисляем 10 единиц валюты
     setScore(prev => prev + 10);
-  };
-
-  // Функция завершения игры и обновления баланса
-  const handleGameOver = async () => {
-    if (gameOver) return;
-    setGameOver(true);
-    clearInterval(spawnInterval.current);
-    try {
-      const currentBalanceStr = await AsyncStorage.getItem('balance');
-      const currentBalance = currentBalanceStr ? parseInt(currentBalanceStr, 10) : 0;
-      const newBalance = currentBalance + score;
-      await AsyncStorage.setItem('balance', newBalance.toString());
-    } catch (error) {
-      console.error("Ошибка при обновлении баланса: ", error);
-    }
-    setObjects([]);
   };
 
   const handleRemove = (id) => {
@@ -219,10 +253,12 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
   const restartGame = () => {
     setScore(0);
     setGameOver(false);
+    setWin(false);
     setObjects([]);
     objectId.current = 0;
     elapsedTimeRef.current = 0;
     setElapsedTime(0);
+    setLevel(1); // Сброс уровня при перезапуске
   };
 
   return (
@@ -239,7 +275,9 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
       />
 
       <View style={styles.scoreContainer}>
-        <Text style={styles.scoreText}>Score: {score}</Text>
+        <Text style={styles.scoreText}>
+          Score: {score} | Level: {level}
+        </Text>
       </View>
 
       {objects.map(obj => {
@@ -271,9 +309,8 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
         return null;
       })}
 
-      {/* Кнопка выхода с изображением вместо текста */}
       <TouchableOpacity
-        style={styles.exitButton}
+        style={styles.backArrow}
         onPress={() => {
           if (navigation) {
             navigation.navigate('StartScreen');
@@ -282,17 +319,17 @@ export default function BalloonPopGameWithBombExplosion({ navigation }) {
           }
         }}
       >
-        <Image
-          source={require('../assets/Exit.png')}
-          style={styles.exitButtonImage}
-        />
+        <Image 
+                  source={require('../assets/arrow.png')}
+                  style={styles.arrowImage}
+                />
       </TouchableOpacity>
 
       {gameOver && (
         <View style={styles.overlay}>
           <View style={styles.gameOverBox}>
             <Image
-              source={require('../assets/Over.png')}
+              source={win ? require('../assets/win.png') : require('../assets/Over.png')}
               style={styles.gameOverImage}
             />
             <TouchableOpacity style={styles.overlayButton} onPress={restartGame}>
@@ -329,6 +366,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  backArrow: {
+    position: 'absolute',
+    top: 40,
+    left: 10,
+    zIndex: 2,
+  },
   scoreContainer: {
     position: 'absolute',
     top: 70,
@@ -338,10 +381,9 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   scoreText: {
-    color: 'white',
+    color: 'rgb(255, 123, 0)',
     fontSize: 28,
     fontWeight: 'bold',
-    color: 'rgb(255, 123, 0)',
   },
   exitButton: {
     position: 'absolute',
@@ -390,5 +432,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(253, 169, 59, 0.82)',
     borderRadius: 25,
     padding: 5,
+  },
+  arrowImage: {
+    width: 70,
+    height: 70,
+    resizeMode: 'contain',
   },
 });
